@@ -10,3 +10,4 @@ then
    echo "Commit message polisy is violated. Example: \"[01-test-01-test]: some text\" and no more then 30 chars."
     exit 1
 fi
+###
