@@ -1,14 +1,5 @@
-terraform {
-  required_providers {
-    yandex = {
-      source = "yandex-cloud/yandex"
-    }
-  }
-  required_version = ">= 0.13"
-}
-
 provider "yandex" {
- # token     = "${YC_TOKEN}"
+  # token     = "${YC_TOKEN}"
   cloud_id  = "b1gr1fstlqic84kol5o2"
   folder_id = "b1g763nq8fffievrt1sb"
   zone      = "ru-central1-b"
