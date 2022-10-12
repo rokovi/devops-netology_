@@ -1,0 +1,109 @@
+- name: Creating prometheus user group
+  group: name="{{groupId}}"
+  become: true
+
+- name: Creating prometheus user
+  become: true
+  user:
+    name: "{{userId}}"
+    group: "{{groupId}}"
+    system: yes
+    shell: "/sbin/nologin"
+    comment: "{{userId}} nologin User"
+    createhome: "no"
+    state: present
+
+- name: Install prometheus
+  unarchive:
+    src: "https://github.com/prometheus/prometheus/releases/download/v{{ version }}/prometheus-{{ version }}.linux-amd64.tar.gz"
+    dest: /tmp/
+    remote_src: yes
+
+- name: Copy prometheus files to bin
+  become: true
+  copy:
+    src: "/tmp/prometheus-{{ version }}.linux-amd64/{{ item }}"
+    dest: "/usr/local/bin/{{ item }}"
+    owner: "{{userId}}"
+    group: "{{groupId}}"
+    remote_src: yes
+    mode: 0755
+  with_items:
+    - prometheus
+    - promtool
+    
+- name: Creates data directory
+  become: true
+  file: 
+    path: "/data/prometheus"
+    state: directory
+    owner: "{{userId}}"
+    group: "{{groupId}}"
+    mode: 0755
+
+- name: Creates conf directory
+  become: true
+  file: 
+    path: "/etc/prometheus/{{ item }}"
+    state: directory
+    owner: "{{userId}}"
+    group: "{{groupId}}"
+    mode: 0755
+  with_items:
+    - consoles
+    - console_libraries
+
+- name: Copy html files
+  become: true
+  copy:
+    src: "/tmp/prometheus-{{ version }}.linux-amd64/{{ item }}/"
+    dest: "/etc/prometheus/{{ item }}"
+    directory_mode: 0755
+    owner: "{{userId}}"
+    group: "{{groupId}}"
+    mode: 0644
+    remote_src: yes
+  with_items:
+    - consoles
+    - console_libraries
+
+- name: config file
+  become: true
+  template:
+    src: prometheus.yml.j2
+    dest: /etc/prometheus/prometheus.yml
+
+- name: alert config file
+  become: true
+  copy:
+    src: alertrules.yml
+    dest: /etc/prometheus/alert.rules.yml
+
+- name: Copy systemd init file
+  become: true
+  template:
+    src: service.j2
+    dest: /etc/systemd/system/prometheus.service
+  notify: systemd_reload
+
+- name: Start prometheus service
+  become: true
+  service:
+    name: prometheus
+    state: started
+    enabled: yes
+
+- name: Check if prometheus is accessible
+  uri:
+    url: http://localhost:9090
+    method: GET
+    status_code: 200
+  register: _result
+  until: _result.status == 200
+  retries: 60
+  delay: 1
+    
+- name: Delete prometheus tmp folder
+  file:
+    path: '/tmp/prometheus-{{ version }}.linux-amd64'
+    state: absent

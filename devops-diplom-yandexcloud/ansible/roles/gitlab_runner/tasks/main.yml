@@ -1,0 +1,32 @@
+- name: Install soft
+  become: true
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - curl
+    - git
+  
+- name: Download gl-runner bin
+  become: true
+  shell: curl -L --output /usr/local/bin/gitlab-runner https://gitlab-runner-downloads.s3.amazonaws.com/latest/binaries/gitlab-runner-linux-amd64 && chmod +x /usr/local/bin/gitlab-runner
+
+- name: Creating GitLab Runner user
+  become: true
+  user:
+    name: "gitlab-runner"
+#    group: "{{groupId}}"
+    system: yes
+    shell: "/bin/bash"
+    comment: "GitLab Runner"
+    createhome: "yes"
+    state: present
+
+- name: Install gl-runner as a service
+  become: true
+  shell: gitlab-runner install --user=gitlab-runner --working-directory=/home/gitlab-runner && gitlab-runner start
+  
+- name: Register gl-runner
+  become: true
+  shell: gitlab-runner register -n --url {{ gl_url }} --registration-token {{ gl_token }} --tag-list {{ gl_tag }} --executor {{ gl_exec }}
+    

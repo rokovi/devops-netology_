@@ -1,0 +1,22 @@
+version: '3.6'
+services:
+  web:
+    image: 'gitlab/gitlab-ee:latest'
+    restart: always
+    hostname: '{{ gl_hostname }}'
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url '{{ gl_url }}'
+        gitlab_rails['gitlab_shell_ssh_port'] = 2224
+        letsencrypt['enable'] = false
+        gitlab_rails['initial_root_password'] = '{{ gl_pass }}'
+        gitlab_rails['initial_shared_runners_registration_token'] = '{{ gl_token }}'
+        
+    ports:
+      - '80:80'
+      - '2224:22'
+    volumes:
+      - '{{ gl_path }}/config:/etc/gitlab'
+      - '{{ gl_path }}/logs:/var/log/gitlab'
+      - '{{ gl_path }}/data:/var/opt/gitlab'
+    shm_size: '2gb'

@@ -1,0 +1,117 @@
+---
+- name: Install NGINX From Apt-Get
+  become: yes
+  apt:
+    name: nginx
+    state: present
+
+- name: Install certbot
+  become: yes
+  apt:
+    name: certbot
+    state: present
+    
+- name: Create directory for letsencrypt requests
+  become: yes
+  file:
+    path: /etc/nginx/letsencrypt
+    state: directory
+    owner: root
+    group: www-data
+    mode: 02774
+    recurse: yes
+
+- name: Create snippet for letsencrypt
+  become: yes
+  template:
+    src: templates/letsencrypt.conf.j2
+    dest: /etc/nginx/snippets/letsencrypt.conf
+        
+- name: Create snippet for ssl
+  become: yes
+  template:
+    src: templates/ssl.conf.j2
+    dest: /etc/nginx/snippets/ssl.conf
+          
+- name: Disable NGINX Default Virtual Host
+  become: yes
+  command:
+    cmd: unlink /etc/nginx/sites-enabled/default
+  ignore_errors: yes
+
+- name: Create NGINX Conf Files
+  become: yes
+  template:
+    src: templates/http-tmpl.conf.j2
+    dest: /etc/nginx/sites-available/{{ item }}.conf
+  with_items:
+    - www.rokovi.space
+    - gitlab.rokovi.space
+    - grafana.rokovi.space
+    - prometheus.rokovi.space
+    - alertmanager.rokovi.space
+    
+- name: Link Conf Files
+  become: yes
+  command:
+    cmd: ln -s /etc/nginx/sites-available/{{ item }} /etc/nginx/sites-enabled/{{ item }}
+  with_items:
+    - www.rokovi.space.conf
+    - gitlab.rokovi.space.conf
+    - grafana.rokovi.space.conf
+    - prometheus.rokovi.space.conf
+    - alertmanager.rokovi.space.conf
+  ignore_errors: yes
+
+- name: Restart nginx
+  become: yes
+  service:
+    name: nginx
+    state: restarted
+    enabled: yes
+
+- name: Generate dhparams
+  become: yes
+  shell: openssl dhparam -out /etc/nginx/dhparams.pem 2048
+  args:
+    creates: /etc/nginx/dhparams.pem    
+
+- name: Create certificates
+  become: true
+  shell: certbot certonly --agree-tos --email k.rostovtcev@gmail.com --webroot -w /etc/nginx/letsencrypt/ -d {{ item }}
+  args:
+    creates: /etc/letsencrypt/live/{{ item }}
+  with_items:
+    - www.rokovi.space
+    - gitlab.rokovi.space
+    - grafana.rokovi.space
+    - prometheus.rokovi.space
+    - alertmanager.rokovi.space
+  tags:
+    - certbot
+
+- name: Change NGINX Conf Files for https usage
+  become: yes
+  template:
+    src: templates/https-{{ item }}.j2
+    dest: /etc/nginx/sites-available/{{ item }}.conf
+  with_items:
+    - www.rokovi.space
+    - gitlab.rokovi.space
+    - grafana.rokovi.space
+    - prometheus.rokovi.space
+    - alertmanager.rokovi.space
+  tags:
+    - https-tmpl
+
+- name: Reload nginx
+  become: yes
+  service:
+    name: nginx
+    state: reloaded
+  tags:
+    - https-tmpl
+  
+- name: Enable certificate autorenewal
+  shell: echo 'deploy-hook = systemctl reload nginx' | sudo tee -a /etc/letsencrypt/cli.ini
+  become: true

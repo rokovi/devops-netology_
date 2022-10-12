@@ -1,0 +1,14 @@
+https://docs.docker.com/engine/install/ubuntu/
+
+https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04
+
+
+https://www.czerniga.it/2021/11/14/how-to-install-gitlab-using-docker-compose/
+
+https://techoverflow.net/2018/12/17/how-to-disable-lets-encrypt-in-the-gitlab-ce-docker-image/
+
+GITLAB_OMNIBUS_CONFIG="letsencrypt['enable'] = false" EXTERNAL_URL=http://192.168.1.108 apt-get install gitlab-ee
+
+# docker-compose up -d --force-recreate && docker-compose ps
+
+# docker exec -it gitlab_web_1 grep 'Password:' /etc/gitlab/initial_root_password

@@ -1,0 +1,83 @@
+- hosts: proxy
+  gather_facts: yes
+  roles:
+    - nginx
+    - node_exporter
+    
+  pre_tasks:
+    - name: update apt cache if needed
+      become: yes
+      apt:
+        update_cache=yes
+        cache_valid_time=3600
+    
+- hosts: dbs
+  gather_facts: no
+  roles:
+    - { role: mysql, 
+              repl_usr: [{ name: replica, pass: replica }],
+              mysql_usr: [{ name: wordpress, pass: wordpress }],
+              dbase: wordpress,
+              prime_ip: 192.168.178.12 }
+    - node_exporter
+    
+  pre_tasks:
+    - name: update apt cache if needed
+      become: yes
+      apt:
+        update_cache=yes
+        cache_valid_time=3600
+
+- hosts: wp
+  gather_facts: no
+  roles:
+    - wordpress
+    - node_exporter
+    
+  pre_tasks:
+    - name: update apt cache if needed
+      become: yes
+      apt:
+        update_cache=yes
+        cache_valid_time=3600
+    
+- hosts: gl
+  gather_facts: yes
+  roles:
+    - gitlab_ee
+    - node_exporter
+    
+  pre_tasks:
+    - name: update apt cache if needed
+      become: yes
+      apt:
+        update_cache=yes
+        cache_valid_time=3600
+    
+- hosts: run
+  gather_facts: yes
+  roles:
+    - gitlab_runner
+    - node_exporter
+    
+  pre_tasks:
+    - name: update apt cache if needed
+      become: yes
+      apt:
+        update_cache=yes
+        cache_valid_time=3600
+    
+- hosts: mon
+  gather_facts: yes
+  roles:
+    - node_exporter
+    - prometheus
+    - alertmanager
+    - grafana
+
+  pre_tasks:
+    - name: update apt cache if needed
+      become: yes
+      apt:
+        update_cache=yes
+        cache_valid_time=3600

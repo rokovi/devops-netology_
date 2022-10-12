@@ -1,0 +1,6 @@
+---
+serviceName: "prometheus"
+userId: "prometheus"
+groupId: "prometheus"
+version: "2.37.1"
+exec_command: "/usr/local/bin/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/data/prometheus --storage.tsdb.retention=2d --web.console.templates=/etc/prometheus/consoles --web.console.libraries=/etc/prometheus/console_libraries"

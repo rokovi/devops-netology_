@@ -1,0 +1,92 @@
+---    
+- name: Install Mysql and deps
+  become: yes
+  package:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - mysql-server
+    - mysql-client 
+    - python3-mysqldb
+    - libmysqlclient-dev
+   
+- name: Remove file
+  become: yes
+  file:
+    path: /etc/mysql/mysql.conf.d/mysql.cnf
+    state: absent
+    
+- name: Copy mysql config
+  become: yes
+  copy: 
+    src: mysqld.cnf.j2.{{ inventory_hostname }}
+    dest: /etc/mysql/mysql.conf.d/mysqld.cnf
+
+- name: Restart and enable mysql service
+  become: yes
+  service:
+    name: mysql
+    state: restarted
+    enabled: yes
+    
+- name: Create the replication user
+  become: yes
+  mysql_user:
+    name: "{{ item.name }}"
+    host: "%"
+    password: "{{ item.pass }}"
+    priv: "*.*:REPLICATION SLAVE"
+    state: present
+    login_unix_socket: "/var/run/mysqld/mysqld.sock"
+  with_items:
+    - "{{ repl_usr }}"
+  when: inventory_hostname == "db01"
+  
+- name: Get data from master file and position
+  become: yes 
+  mysql_replication:
+    mode: getprimary
+    login_unix_socket: "/var/run/mysqld/mysqld.sock"
+  register: masterdata
+  when: inventory_hostname == "db01"
+
+- name: Change master data
+  become: yes
+  mysql_replication:
+    mode: changeprimary
+    master_host: "{{ prime_ip }}"
+    master_user: "{{ item.name }}"
+    master_password: "{{ item.pass }}"
+    master_log_file: '{{ hostvars.db01.masterdata.File }}'
+    master_log_pos: '{{ hostvars.db01.masterdata.Position }}'
+    login_unix_socket: "/var/run/mysqld/mysqld.sock"
+  with_items:
+    - "{{ repl_usr }}"
+  when: inventory_hostname == "db02"
+  notify:
+    - Restart mysql
+    
+- name: Create mysql db
+  become: yes
+  mysql_db:
+    name: "{{ dbase }}"
+    state: present
+    login_unix_socket: "/var/run/mysqld/mysqld.sock"
+  when: inventory_hostname == "db01"
+  tags:
+    - create_db
+    
+- name: Create mysql user
+  become: yes
+  mysql_user:
+    name: "{{ item.name }}"
+    password: "{{ item.pass }}"
+    priv: '{{ dbase }}.*:ALL'
+    host: '%'
+    state: present
+    login_unix_socket: "/var/run/mysqld/mysqld.sock"
+  with_items:
+    - "{{ mysql_usr }}"
+  when: inventory_hostname == "db01"
+  tags:
+    - create_usr

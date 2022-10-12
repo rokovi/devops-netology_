@@ -1,0 +1,12 @@
+#MySQL Settings
+mysql_master_host: "192.168.178.12"
+mysql_slave_host: "192.168.178.13"
+mysql_db: "wordpress"
+mysql_user: "wordpress"
+mysql_password: "wordpress"
+
+#HTTP Settings
+http_host: "www.rokovi.space"
+
+#WP Settings
+wp_dir: "/var/www/wordpress"

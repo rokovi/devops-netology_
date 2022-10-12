@@ -1,0 +1,6 @@
+location ^~ /.well-known/acme-challenge/ {
+  allow all;
+  root /etc/nginx/letsencrypt/;
+  default_type "text/plain";
+  try_files $uri =404;
+}
