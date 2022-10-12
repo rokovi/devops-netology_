@@ -144,7 +144,7 @@ stage
 2. В браузере можно открыть любой из этих URL и увидеть ответ сервера (502 Bad Gateway). На текущем этапе выполнение задания это нормально!
 
 
-######За развертывания reverse-proxy Nginx и генерацию сертификатов, отвечает роль [nginx](./ansible/roles/nginx/tasks/main.yml)
+###### За развертывание reverse-proxy Nginx и генерацию сертификатов, отвечает роль [nginx](./ansible/roles/nginx/tasks/main.yml)
 ___
 ### Установка кластера MySQL
 
@@ -167,8 +167,8 @@ ___
 **Вы должны понимать, что в рамках обучения это допустимые значения, но в боевой среде использование подобных значений не приемлимо! Считается хорошей практикой использовать логины и пароли повышенного уровня сложности. В которых будут содержаться буквы верхнего и нижнего регистров, цифры, а также специальные символы!**
 
 
-######За создание master и slave сервера отвечает роль [mysql](./ansible/roles/mysql/tasks/main.yml)
-######Переменные роли вынесены в ansible [playbook](./yc-diplom-done.yml)
+###### За создание master и slave сервера отвечает роль [mysql](./ansible/roles/mysql/tasks/main.yml)
+###### Переменные роли вынесены в ansible [playbook](./yc-diplom-done.yml)
 
 ___
 ### Установка WordPress
@@ -261,8 +261,8 @@ resource "yandex_dns_recordset" "rs5" {
 ---
 ![wordpress](./img/www.rokovi.space.jpg)
 
-######За развертывание CMS отвечает роль [wordpress](./ansible/roles/wordpress/tasks/main.yml)
-######Для работы c mysql в режиме master-slave был взят plugin [HyperDB](https://wordpress.org/plugins/hyperdb/)
+###### За развертывание CMS отвечает роль [wordpress](./ansible/roles/wordpress/tasks/main.yml)
+###### Для работы c mysql в режиме master-slave был взят plugin [HyperDB](https://wordpress.org/plugins/hyperdb/)
 ### Установка Gitlab CE и Gitlab Runner
 
 Необходимо настроить CI/CD систему для автоматического развертывания приложения при изменении кода.
@@ -360,12 +360,12 @@ deploy-job:
 ```
 ![gitlab](./img/gl-php.info.jpg)
 
-######За развертывание Gitlab отвечает роль [gitlabee](./ansible/roles/gitlab_ee/tasks/main.yml)
+###### За развертывание Gitlab отвечает роль [gitlabee](./ansible/roles/gitlab_ee/tasks/main.yml)
 ```
 Роль gitlab_ee была написана с испоьзованием Gitlab docker img'a, т.к. попытки установить
 с помощью скрипта с официального сайта получают отлуп по региональному признаку.  
 ```
-######За развертывание Gitlab отвечает роль [gitlab_runner](./ansible/roles/gitlab_runner/tasks/main.yml)
+###### За развертывание Gitlab отвечает роль [gitlab_runner](./ansible/roles/gitlab_runner/tasks/main.yml)
 ___
 ### Установка Prometheus, Alert Manager, Node Exporter и Grafana
 
@@ -415,10 +415,10 @@ IP-адреса берутся во время развертывания рол
 
 *Примечание: дашборды со звёздочкой являются опциональными заданиями повышенной сложности их выполнение желательно, но не обязательно.*
 
-######За развертывание Node Exporter отвечает роль [node_exporter](./ansible/roles/node_exporter/tasks/main.yml)
-######За развертывание Prometheus отвечает роль [prometheus](./ansible/roles/prometheus/tasks/main.yml)
-######За развертывание Alert Manager отвечает роль [alertmanager](./ansible/roles/alertmanager/tasks/main.yml)
-######За развертывание Grafana отвечает роль [grafana](./ansible/roles/grafana/tasks/main.yml)
+###### За развертывание Node Exporter отвечает роль [node_exporter](./ansible/roles/node_exporter/tasks/main.yml)
+###### За развертывание Prometheus отвечает роль [prometheus](./ansible/roles/prometheus/tasks/main.yml)
+###### За развертывание Alert Manager отвечает роль [alertmanager](./ansible/roles/alertmanager/tasks/main.yml)
+###### За развертывание Grafana отвечает роль [grafana](./ansible/roles/grafana/tasks/main.yml)
 
 Вывод работы [playbook'a](./ansible/yc-diplom-done.yml) ansible:
 ![Prometheus](./img/ansible.jpg)
